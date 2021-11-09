@@ -31,6 +31,13 @@ from a git repo."
                              repo-dirname)
                      (format nil "GIT_TERMINAL_PROMPT=0 /usr/bin/git clone --depth 1 ~A ~A"
                              repo-git-uri repo-dirname))))
+
+    (dolist (line (inferior-shell:run "/usr/bin/git config --global user.email \"anthony@atgreen.org\""))
+      (log:info line))
+
+    (dolist (line (inferior-shell:run "/usr/bin/git config --global user.name \"Daily Price Depot Droid\""))
+      (log:info line))
+
     (dolist (line (inferior-shell:run command))
       (log:info line))))
 
