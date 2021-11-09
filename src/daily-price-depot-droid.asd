@@ -41,5 +41,6 @@
                :prometheus.collectors.sbcl
                :prometheus.exposers.hunchentoot
                :prometheus.formats.text
+               :scheduler
                :split-sequence
                :str))
