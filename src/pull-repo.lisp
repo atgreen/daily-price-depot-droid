@@ -36,7 +36,7 @@ from a git repo."
 
 (defun commit-and-push-repo (repo-dirname)
   "Commit all changes in REPO-DIRNAME and push upstream."
-  (log:info "commit and push repo ~A" repo-git-uri)
+  (log:info "commit and push repo")
   (dolist (line (inferior-shell:run
                  (format nil "bash -c \"(cd ~A; /usr/bin/git add *)\""
                          repo-dirname)))
