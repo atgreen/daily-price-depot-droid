@@ -16,7 +16,7 @@
 ;;; License along with this program.  If not, see
 ;;; <http://www.gnu.org/licenses/>.
 
-(in-package :daily-price-depot)
+(in-package :daily-price-depot-droid)
 
 (defparameter +alphavantage-api-uri+ "https://www.alphavantage.co/query")
 (defparameter *alphavantage-api-key* (uiop:getenv "ALPHAVANTAGE_API_KEY"))
