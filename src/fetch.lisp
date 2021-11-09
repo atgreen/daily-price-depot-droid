@@ -73,5 +73,7 @@
             (format t price)))))))
 
 (defun pull-daily ()
-  (dolist (equity *equities*)
-    (save-data-for-equity "../data/equity/" equity)))
+  (let ((equity-dir (format nil "~A/daily-price-depot/equity/" (uiop:getenv "HOME"))))
+    (dolist (equity *equities*)
+      (save-data-for-equity
+       (format nil equity-dir equity)))))

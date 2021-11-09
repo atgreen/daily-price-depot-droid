@@ -205,7 +205,8 @@
       (setf *alphavantage-api-key* (get-config-value "ALPHAVANTAGE_API_KEY"))
       (setf *equities* (get-config-value "equities"))
 
-      (pull-repo "/tmp/dpd" (get-config-value "repo-git-uri"))
+      (pull-repo (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))
+                 (get-config-value "repo-git-uri"))
 
       ;; Initialize prometheus
       (initialize-metrics)
@@ -214,7 +215,7 @@
 
       (scheduler:create-scheduler-task
        *scheduler*
-       "30 16 * * * (daily-price-depot-droid:pull-daily)")
+       (format nil "~A (daily-price-depot-droid:pull-daily)" (get-config-value "cron-schedule")))
 
       (setf hunchentoot:*dispatch-table* +daily-price-depot-droid-dispatch-table+)
       (setf prom:*default-registry* *daily-price-depot-droid-registry*)
