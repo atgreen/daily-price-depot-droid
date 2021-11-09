@@ -195,6 +195,9 @@
       ;; Extract any config.ini settings here.
       (setf *server-uri* (get-config-value "server-uri"))
 
+      (log:info (get-config-value "ALPHAVANTAGE_API_KEY"))
+      (log:info (get-config-value "equities"))
+
       ;; Initialize prometheus
       (initialize-metrics)
 
