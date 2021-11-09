@@ -218,11 +218,11 @@
        (format nil "~A (daily-price-depot-droid:pull-daily)" (get-config-value "cron-schedule")))
 
       (format t "~A (daily-price-depot-droid:pull-daily)~%" (get-config-value "cron-schedule"))
-      (pprint (scheduler:list-scheduler-tasks *scheduler*))
-      (pprint (scheduler:list-scheduler-tasks *scheduler*))
-      (pprint (scheduler:list-scheduler-tasks *scheduler*))
-      (pprint (scheduler:list-scheduler-tasks *scheduler*))
-      (format t "=======================================================~%")
+
+      (loop for hour from 0 to 23
+            do (scheduler:create-scheduler-task
+                *scheduler*
+                (format nil "H/5 ~A * * * (pprint ~A)" hour hour)))
 
       ;; Start the scheduler
       (bt:make-thread (lambda () (scheduler:start-scheduler *scheduler*)))
