@@ -22,6 +22,8 @@
   :version "0"
   :serial t
   :components ((:file "package")
+               (:file "fetch")
+               (:file "pull-repo")
 	       (:file "daily-price-depot-droid"))
   :depends-on (:alexandria
                :cl-csv
