@@ -188,6 +188,7 @@
 	       ;; Some of the users of these values are very strict
 	       ;; when it comes to string types... I'm looking at you,
 	       ;; SB-BSD-SOCKETS:GET-HOST-BY-NAME.
+               (log:info ">> ~A: ~A" key value)
 	       (if (subtypep (type-of value) 'vector)
 		   (coerce value 'simple-string)
 		   value))))
