@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: daily-price-depot-droid-pod
+  name: daily-price-depot-droid-pod
+spec:
+  containers:
+  - name: daily-price-depot-droid
+    image: localhost/daily-price-depot-droid:latest
+    ports:
+    - containerPort: 8080
+      hostPort: 8080
+      protocol: TCP
+    - containerPort: 4005
+      hostPort: 4005
+      protocol: TCP
+    - containerPort: 9101
+      hostPort: 9101
+      protocol: TCP
+    volumeMounts:
+    - mountPath: /etc/daily-price-depot-droid/config.ini
+      name: daily-price-depot-droid-config
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities: {}
+      privileged: false
+      readOnlyRootFilesystem: false
+      seLinuxOptions: {}
+  volumes:
+  - name: daily-price-depot-droid-config
+    hostPath:
+      path: /home/runner/work/daily-price-depot-droid/daily-price-depot-droid/test/config.ini
+      type: File
+status: {}
