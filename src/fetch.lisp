@@ -52,11 +52,37 @@
                sym
                ".db"))
 
+(defun save-historical-data-for-equity (dir sym)
+  (let ((filename (compute-equity-filename dir sym))
+        (cutoff (- (get-universal-time)
+                   (- (date-time-parser:parse-date-time "2007")
+                      (date-time-parser:parse-date-time "2000")))))
+    (unless (probe-file filename)
+      (sleep 13) ;; Rate limit to 5 requests per minute per API key
+      (let ((history (fetch-history sym)))
+        (handler-case
+            (let ((prices (reverse (cdr (cl-csv:read-csv history)))))
+              (with-open-file (stream filename :direction :output :if-exists :overwrite :if-does-not-exist :create)
+                (dolist (price prices)
+                  (let ((date (date-time-parser:parse-date-time (car price))))
+                    (when (> date cutoff)
+                      (format stream "P ~A 23:59:59 ~A ~A ~A~%"
+                              (car price)
+                              sym
+                              (nth 4 price)
+                              (equity-currency sym)))))))
+          (error (c)
+            (format t "ERROR: ~A~%" c)
+            (format t history)))))))
+
 (defun save-data-for-equity (dir sym)
   (let ((filename (compute-equity-filename dir sym)))
     (print filename)
+    (sleep 13) ;; Rate limit to 5 requests per minute per API key
+    (unless (probe-file filename)
+      (save-historical-data-for-equity dir sym)
+      (sleep 13))
     (when (probe-file filename)
-      (sleep 13) ;; Rate limit to 5 requests per minute per API key
       (let ((price (fetch-price sym)))
         (print price)
         (handler-case
