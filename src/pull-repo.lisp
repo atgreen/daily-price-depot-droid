@@ -33,3 +33,24 @@ from a git repo."
                              repo-git-uri repo-dirname))))
     (dolist (line (inferior-shell:run command))
       (log:info line))))
+
+(defun commit-and-push-repo (repo-dirname)
+  "Commit all changes in REPO-DIRNAME and push upstream."
+  (log:info "commit and push repo ~A" repo-git-uri)
+  (let ((command (if (fad:directory-exists-p repo-dirname)
+                     (format nil "bash -c \"(cd ~A; /usr/bin/git pull)\""
+                             repo-dirname)
+                     (format nil "GIT_TERMINAL_PROMPT=0 /usr/bin/git clone --depth 1 ~A ~A"
+                             repo-git-uri repo-dirname))))
+    (dolist (line (inferior-shell:run
+                   (format nil "bash -c \"(cd ~A; /usr/bin/git add *)\""
+                           repo-dirname)))
+      (log:info line))
+    (dolist (line (inferior-shell:run
+                   (format nil "bash -c \"(cd ~A; /usr/bin/git commit -m 'Daily update')\""
+                           repo-dirname)))
+      (log:info line))
+    (dolist (line (inferior-shell:run
+                   (format nil "bash -c \"(cd ~A; /usr/bin/git push)\""
+                           repo-dirname)))
+      (log:info line))))
