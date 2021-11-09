@@ -208,6 +208,9 @@
       (pull-repo (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))
                  (get-config-value "repo-git-uri"))
 
+      ;; Start the scheduler
+      (bt:make-thread (lambda () (scheduler:start-scheduler *scheduler*)))
+
       ;; Initialize prometheus
       (initialize-metrics)
 
