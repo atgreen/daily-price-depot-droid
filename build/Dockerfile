@@ -1,6 +1,8 @@
 FROM quay.io/atgreen/daily-price-depot-droid-base:latest
 
+USER 0
 RUN rm /etc/localtime && ln -s /usr/share/zoneinfo/Canada/Eastern /etc/localtime
+USER 1000
 
 COPY . /tmp/src
 ARG APP_VERSION=APP_VERSION
