@@ -216,6 +216,8 @@
 
       (log:info "Starting server")
 
+      (daily-price-depot-droid:pull-daily)
+
       (scheduler:create-scheduler-task
        *scheduler*
        (format nil "~A (daily-price-depot-droid:pull-daily)" (get-config-value "cron-schedule")))
