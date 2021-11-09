@@ -2,10 +2,9 @@
 
 # daily-price-depot-droid
 
-* Add the following repository secrets to the github.com repo, under Setting > Secrets > New Repository Secret:
-  * `REGISTRY_USERNAME`: your container registry username
-  * `REGISTRY_PASSWORD`: your container registry password
+Sample /etc/daily-price-depot-droid/config.ini:
 
-* Create two container repositories at `quay.io/atgreen`:
-  * `quay.io/atgreen/daily-price-depot-droid-base`: a base image to cache quicklisp contents and additional OS packages
-  * `quay.io/atgreen/daily-price-depot-droid`: the final application
+    ALPHAVANTAGE_API_KEY = "SFDGSO98W34K34LW"
+    repo-git-uri = "https://username:password@git.example.com/username/daily-price-depot"
+    equities = [ "IBM.NYSE", "KD.NYSE" ]
+    cron-schedule = "10 16 * * *"
