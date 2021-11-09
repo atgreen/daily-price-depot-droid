@@ -208,22 +208,24 @@
       (pull-repo (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))
                  (get-config-value "repo-git-uri"))
 
-      ;; Start the scheduler
-      (bt:make-thread (lambda () (scheduler:start-scheduler *scheduler*)))
-
       ;; Initialize prometheus
       (initialize-metrics)
 
       (log:info "Starting server")
 
-      (daily-price-depot-droid:pull-daily)
-
       (scheduler:create-scheduler-task
        *scheduler*
        (format nil "~A (daily-price-depot-droid:pull-daily)" (get-config-value "cron-schedule")))
 
-      (format t "~A (daily-price-depot-droid:pull-daily)" (get-config-value "cron-schedule"))
+      (format t "~A (daily-price-depot-droid:pull-daily)~%" (get-config-value "cron-schedule"))
       (pprint (scheduler:list-scheduler-tasks *scheduler*))
+      (pprint (scheduler:list-scheduler-tasks *scheduler*))
+      (pprint (scheduler:list-scheduler-tasks *scheduler*))
+      (pprint (scheduler:list-scheduler-tasks *scheduler*))
+      (format t "=======================================================~%")
+
+      ;; Start the scheduler
+      (bt:make-thread (lambda () (scheduler:start-scheduler *scheduler*)))
 
       (setf hunchentoot:*dispatch-table* +daily-price-depot-droid-dispatch-table+)
       (setf prom:*default-registry* *daily-price-depot-droid-registry*)
