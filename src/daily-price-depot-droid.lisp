@@ -189,9 +189,9 @@
 	       ;; when it comes to string types... I'm looking at you,
 	       ;; SB-BSD-SOCKETS:GET-HOST-BY-NAME.
                (log:info ">> ~A: ~A" key value)
-	       (if (subtypep (type-of value) 'vector)
+               (handler-case
 		   (coerce value 'simple-string)
-		   value))))
+                 (error () value)))))
 
       ;; Extract any config.ini settings here.
       (setf *server-uri* (get-config-value "server-uri"))
