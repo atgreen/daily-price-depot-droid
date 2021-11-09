@@ -222,6 +222,9 @@
        *scheduler*
        (format nil "~A (daily-price-depot-droid:pull-daily)" (get-config-value "cron-schedule")))
 
+      (format t "~A (daily-price-depot-droid:pull-daily)" (get-config-value "cron-schedule"))
+      (pprint (scheduler:list-scheduler-tasks *scheduler*))
+
       (setf hunchentoot:*dispatch-table* +daily-price-depot-droid-dispatch-table+)
       (setf prom:*default-registry* *daily-price-depot-droid-registry*)
       (setf *print-pretty* nil)
