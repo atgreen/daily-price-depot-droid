@@ -18,11 +18,8 @@
 
 (in-package :daily-price-depot)
 
-;; Read the equities list.
-(defparameter +equities+ (uiop:read-file-lines "equities.txt"))
-
 (defparameter +alphavantage-api-uri+ "https://www.alphavantage.co/query")
-(defparameter +alphavantage-api-key+ (uiop:getenv "ALPHAVANTAGE_API_KEY"))
+(defparameter *alphavantage-api-key* (uiop:getenv "ALPHAVANTAGE_API_KEY"))
 
 (defun equity-currency (equity)
   (let ((epair (split-sequence:split-sequence #\. equity)))
@@ -41,7 +38,7 @@
   (format t "Fetching closing price for ~A." equity)
   (let ((parameters `(("function" . "GLOBAL_QUOTE")
                       ("symbol" . ,(transform-equity-symbol equity))
-                      ("apikey" . ,+alphavantage-api-key+))))
+                      ("apikey" . ,*alphavantage-api-key*))))
     (octets-to-string
      (drakma:http-request +alphavantage-api-uri+
                           :method :get
@@ -76,5 +73,5 @@
             (format t price)))))))
 
 (defun pull-daily ()
-  (dolist (equity +equities+)
+  (dolist (equity *equities*)
     (save-data-for-equity "../data/equity/" equity)))

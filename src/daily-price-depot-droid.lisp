@@ -41,6 +41,13 @@
  	v)))
 
 ;; ----------------------------------------------------------------------------
+;; Define the scheduler and others...
+
+(defvar *scheduler* (make-instance 'scheduler:in-memory-scheduler))
+(defvar *alphavantage-api-key* nil)
+(defvar *equities* nil)
+
+;; ----------------------------------------------------------------------------
 ;; Find the directory in which we are installed.  This is used to
 ;; serve up static content.
 
@@ -188,7 +195,6 @@
 	       ;; Some of the users of these values are very strict
 	       ;; when it comes to string types... I'm looking at you,
 	       ;; SB-BSD-SOCKETS:GET-HOST-BY-NAME.
-               (log:info ">> ~A: ~A" key value)
                (handler-case
 		   (coerce value 'simple-string)
                  (error () value)))))
@@ -196,13 +202,17 @@
       ;; Extract any config.ini settings here.
       (setf *server-uri* (get-config-value "server-uri"))
 
-      (log:info (get-config-value "ALPHAVANTAGE_API_KEY"))
-      (log:info (get-config-value "equities"))
+      (setf *alphavantage-api-key* (get-config-value "ALPHAVANTAGE_API_KEY"))
+      (setf *equities* (get-config-value "equities"))
 
       ;; Initialize prometheus
       (initialize-metrics)
 
       (log:info "Starting server")
+
+      (scheduler:create-scheduler-task
+       *scheduler*
+       "30 16 * * * (daily-price-depot-droid:pull-daily)")
 
       (setf hunchentoot:*dispatch-table* +daily-price-depot-droid-dispatch-table+)
       (setf prom:*default-registry* *daily-price-depot-droid-registry*)
