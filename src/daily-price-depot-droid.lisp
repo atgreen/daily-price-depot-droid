@@ -205,7 +205,7 @@
       (setf *alphavantage-api-key* (get-config-value "ALPHAVANTAGE_API_KEY"))
       (setf *equities* (get-config-value "equities"))
 
-      (pull-repo "/tmp" (get-config-value "repo-git-uri"))
+      (pull-repo "/tmp/dpd" (get-config-value "repo-git-uri"))
 
       ;; Initialize prometheus
       (initialize-metrics)
