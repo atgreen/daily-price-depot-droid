@@ -21,4 +21,4 @@
 (defpackage #:daily-price-depot-droid
   (:use #:cl)
   (:shadow #:package)
-  (:export #:start-server #:stop-server))
+  (:export #:start-server #:stop-server #:pull-daily))
