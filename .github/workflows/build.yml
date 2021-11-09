@@ -70,19 +70,19 @@ jobs:
         build-args: |
           APP_VERSION=${{ steps.version.outputs.version }}
 
-    - name: Test
-      run: |
-        podman play kube test/test-pod.yml
-        timeout -s TERM 45 bash -c \
-          'while [[ "$(curl -s -o /dev/null -L -w ''%{http_code}'' ${0})" != "200" ]];\
-            do echo "Waiting for ${0}" && sleep 2;\
-           done' http://localhost:8080/health
-        sh ./test/test.sh localhost:8080 || \
-        (EXIT_CODE=$?
-         curl -s http://localhost:8080
-         echo "==== Container Logs ================================"
-         podman logs daily-price-depot-droid-pod-daily-price-depot-droid
-         exit $EXIT_CODE)
+    # - name: Test
+    #   run: |
+    #     podman play kube test/test-pod.yml
+    #     timeout -s TERM 45 bash -c \
+    #       'while [[ "$(curl -s -o /dev/null -L -w ''%{http_code}'' ${0})" != "200" ]];\
+    #         do echo "Waiting for ${0}" && sleep 2;\
+    #        done' http://localhost:8080/health
+    #     sh ./test/test.sh localhost:8080 || \
+    #     (EXIT_CODE=$?
+    #      curl -s http://localhost:8080
+    #      echo "==== Container Logs ================================"
+    #      podman logs daily-price-depot-droid-pod-daily-price-depot-droid
+    #      exit $EXIT_CODE)
 
     - name: Push to registry
       id: push-to-quay
