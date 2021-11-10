@@ -28,11 +28,17 @@
         "CAD"
         "USD")))
 
+(defun fund-currency (equity)
+  "USD")
+
 (defun transform-equity-symbol (equity)
   (let ((epair (split-sequence:split-sequence #\. equity)))
     (if (string= (car (cdr epair)) "TSX")
         (concatenate 'string "TSX:" (car epair))
         (car epair))))
+
+(defun transform-fund-symbol (equity)
+  equity)
 
 (defun fetch-history (equity)
   (format t "Fetching historical data for ~A.~%" equity)
@@ -117,5 +123,13 @@
     (pull-repo (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))
                *repo-git-uri*)
     (loop for equity across *equities* do
+      (save-data-for-equity equity-dir equity))
+    (commit-and-push-repo equity-dir)))
+
+(defun pull-daily-funds ()
+  (let ((equity-dir (format nil "~A/daily-price-depot/fund/" (uiop:getenv "HOME"))))
+    (pull-repo (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))
+               *repo-git-uri*)
+    (loop for equity across *funds* do
       (save-data-for-equity equity-dir equity))
     (commit-and-push-repo equity-dir)))

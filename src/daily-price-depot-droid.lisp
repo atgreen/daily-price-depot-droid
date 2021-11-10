@@ -225,6 +225,7 @@
       (bt:make-thread (lambda () (scheduler:start-scheduler *scheduler*)))
 
       (pull-daily)
+      (pull-daily-funds)
 
       (setf hunchentoot:*dispatch-table* +daily-price-depot-droid-dispatch-table+)
       (setf prom:*default-registry* *daily-price-depot-droid-registry*)
