@@ -185,4 +185,29 @@
     (let ((fund-dir (format nil "~A/daily-price-depot/fund/" (uiop:getenv "HOME"))))
       (loop for fund across *funds* do
         (save-data-for-symbol fund-dir fund)))
+
+    ;; Trim to 7 years max
+    (let ((cutoff (- (get-universal-time)
+                     (- (date-time-parser:parse-date-time "2007")
+                        (date-time-parser:parse-date-time "2000")))))
+      (uiop:collect-sub*directories
+       (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))
+       (constantly t)
+       (constantly t)
+       (lambda (it)
+         (dolist (filename (uiop:directory-files it "*.db"))
+           (print filename)
+           (let ((trimmed-file (concatenate 'string (namestring filename) ".trim")))
+             (with-open-file (out-stream
+                              trimmed-file :direction :output
+                                           :if-exists :overwrite
+                                           :if-does-not-exist :create)
+               (with-open-file (in-stream filename)
+                 (loop for line = (read-line in-stream nil)
+                       while line do
+                         (let ((date (date-time-parser:parse-date-time (subseq line 2 12))))
+                           (when (> date cutoff)
+                             (format out-stream "~A~%" line))))))
+             (rename-file trimmed-file filename))))))
+
     (commit-and-push-repo repo-dir)))
