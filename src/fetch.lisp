@@ -34,6 +34,18 @@
         (concatenate 'string "TSX:" (car epair))
         (car epair))))
 
+(defun fetch-history (equity)
+  (format t "Fetching historical data for ~A.~%" equity)
+  (let ((parameters `(("function" . "TIME_SERIES_DAILY")
+                      ("symbol" . ,(transform-equity-symbol equity))
+                      ("outputsize" . "full")
+                      ("datatype" . "csv")
+                      ("apikey" . ,*alphavantage-api-key*))))
+    (octets-to-string
+     (drakma:http-request +alphavantage-api-uri+
+                          :method :get
+                          :parameters parameters))))
+
 (defun fetch-price (equity)
   (format t "Fetching closing price for ~A." equity)
   (let ((parameters `(("function" . "GLOBAL_QUOTE")
