@@ -46,6 +46,7 @@
 (defvar *scheduler* (make-instance 'scheduler:in-memory-scheduler))
 (defvar *alphavantage-api-key* nil)
 (defvar *equities* nil)
+(defvar *funds* nil)
 (defvar *repo-git-uri* nil)
 
 ;; ----------------------------------------------------------------------------
@@ -205,6 +206,7 @@
 
       (setf *alphavantage-api-key* (get-config-value "ALPHAVANTAGE_API_KEY"))
       (setf *equities* (get-config-value "equities"))
+      (setf *funds* (get-config-value "funds"))
       (setf *repo-git-uri* (get-config-value "repo-git-uri"))
 
       (pull-repo (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))
