@@ -157,6 +157,7 @@
 (defun save-data-for-forex-symbol (dir sym)
   (let ((filename (concatenate 'string dir sym ".db")))
     (print filename)
+    (ensure-directories-exist filename)
     (unless (probe-file filename)
       (save-historical-data-for-forex-symbol dir sym)
       (sleep 13))
