@@ -33,9 +33,6 @@
         (concatenate 'string "TSX:" (car epair))
         (car epair))))
 
-(defun transform-fund-symbol (equity)
-  equity)
-
 (defun fetch-history (equity)
   (format t "Fetching historical data for ~A.~%" equity)
   (let ((parameters `(("function" . "TIME_SERIES_DAILY")
