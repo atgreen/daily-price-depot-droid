@@ -35,6 +35,7 @@
 
 (defun fetch-history (equity)
   (format t "Fetching historical data for ~A.~%" equity)
+  (sleep 13) ;; Rate limit to 5 calls / minute
   (let ((parameters `(("function" . "TIME_SERIES_DAILY")
                       ("symbol" . ,(transform-equity-symbol equity))
                       ("outputsize" . "full")
@@ -47,6 +48,7 @@
 
 (defun fetch-price (equity)
   (format t "Fetching closing price for ~A." equity)
+  (sleep 13) ;; Rate limit to 5 calls / minute
   (let ((parameters `(("function" . "GLOBAL_QUOTE")
                       ("symbol" . ,(transform-equity-symbol equity))
                       ("apikey" . ,*alphavantage-api-key*))))
@@ -70,7 +72,6 @@
                    (- (date-time-parser:parse-date-time "2007")
                       (date-time-parser:parse-date-time "2000")))))
     (unless (probe-file filename)
-      (sleep 13) ;; Rate limit to 5 requests per minute per API key
       (ensure-directories-exist filename)
       (let ((history (fetch-history sym)))
         (handler-case
@@ -92,10 +93,8 @@
   (log:info sym)
   (let ((filename (compute-equity-filename dir sym)))
     (log:info filename)
-    (sleep 13) ;; Rate limit to 5 requests per minute per API key
     (unless (probe-file filename)
-      (save-historical-data-for-equity dir sym)
-      (sleep 13))
+      (save-historical-data-for-equity dir sym))
     (let ((price (fetch-price sym)))
       (log:info price)
       (handler-case
@@ -139,7 +138,6 @@
 (defun save-historical-data-for-forex-symbol (dir sym)
   (let ((filename (concatenate 'string dir sym ".db")))
     (unless (probe-file filename)
-      (sleep 13) ;; Rate limit to 5 requests per minute
       (ensure-directories-exist filename)
       (let ((history (fetch-forex-history sym)))
         (handler-case
@@ -160,8 +158,7 @@
     (ensure-directories-exist filename)
     (when fetch-history
       (unless (probe-file filename)
-        (save-historical-data-for-forex-symbol dir sym)
-        (sleep 13)))
+        (save-historical-data-for-forex-symbol dir sym)))
     (let ((exchange (fetch-exchange sym)))
       (handler-case
           (let ((json (cdar (json:decode-json-from-string exchange))))
