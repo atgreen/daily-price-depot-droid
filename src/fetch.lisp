@@ -60,6 +60,7 @@
                       (date-time-parser:parse-date-time "2000")))))
     (unless (probe-file filename)
       (sleep 13) ;; Rate limit to 5 requests per minute per API key
+      (ensure-directories-exist filename)
       (let ((history (fetch-history sym)))
         (handler-case
             (let ((prices (reverse (cdr (cl-csv:read-csv history)))))
