@@ -46,6 +46,7 @@
 (defvar *scheduler* (make-instance 'scheduler:in-memory-scheduler))
 (defvar *alphavantage-api-key* nil)
 (defvar *equities* nil)
+(defvar *repo-git-uri* nil)
 
 ;; ----------------------------------------------------------------------------
 ;; Find the directory in which we are installed.  This is used to
@@ -204,9 +205,10 @@
 
       (setf *alphavantage-api-key* (get-config-value "ALPHAVANTAGE_API_KEY"))
       (setf *equities* (get-config-value "equities"))
+      (setf *repo-git-uri* (get-config-value "repo-git-uri"))
 
       (pull-repo (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))
-                 (get-config-value "repo-git-uri"))
+                 *repo-git-uri*)
 
       ;; Initialize prometheus
       (initialize-metrics)

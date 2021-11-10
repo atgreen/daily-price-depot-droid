@@ -102,7 +102,8 @@
 
 (defun pull-daily ()
   (let ((equity-dir (format nil "~A/daily-price-depot/equity/" (uiop:getenv "HOME"))))
-    (pull-repo (format nil "~A/daily-price-depot" (uiop:getenv "HOME")))
+    (pull-repo (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))
+               *repo-git-uri*)
     (loop for equity across *equities* do
       (save-data-for-equity equity-dir equity))
     (commit-and-push-repo equity-dir)))
