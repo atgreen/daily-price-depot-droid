@@ -1,4 +1,4 @@
-;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: DAILY-PRICE-DEPOT-DROID; Base: 10 -*-
+;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: DAILY-PRICE-DEPOT-DROID; Base: 10 -*-
 ;;;
 ;;; Copyright (C) 2021  Anthony Green <anthony@atgreen.org>
 ;;;
@@ -111,9 +111,73 @@
           (format t "ERROR: ~A~%" c)
           (format t price))))))
 
+(defun fetch-forex-history (currency)
+  (format t "Fetching historical ~A rates.~%" currency)
+  (let ((parameters `(("function" . "FX_DAILY")
+                      ("from_currency" . ,currency)
+                      ("to_currency" . "USD")
+                      ("outputsize" . "full")
+                      ("datatype" . "csv")
+                      ("apikey" . ,*alphavantage-api-key*))))
+    (flexi-streams:octets-to-string
+     (drakma:http-request +alphavantage-api-uri+
+                          :method :get
+                          :parameters parameters))))
+
+(defun fetch-exchange (currency)
+  (format t "Fetching exchange rate for ~A." currency)
+  (let ((parameters `(("function" . "CURRENCY_EXCHANGE_RATE")
+                      ("from_currency" . ,currency)
+                      ("to_currency" . "USD")
+                      ("datatype" . "csv")
+                      ("apikey" . ,*alphavantage-api-key*))))
+    (flexi-streams:octets-to-string
+     (drakma:http-request +alphavantage-api-uri+
+                          :method :get
+                          :parameters parameters))))
+
+(defun save-historical-data-for-forex-symbol (dir sym)
+  (let ((filename (concatenate 'string dir sym ".db")))
+    (unless (probe-file filename)
+      (sleep 13) ;; Rate limit to 5 requests per minute
+      (let ((history (fetch-history sym)))
+        (handler-case
+            (let ((prices (reverse (cdr (cl-csv:read-csv history)))))
+              (with-open-file (stream filename :direction :output :if-exists :overwrite :if-does-not-exist :create)
+                (dolist (price prices)
+                  (format stream "P ~A 23:59:59 ~A ~A USD~%"
+                          (car price)
+                          sym
+                          (cadddr price)))))
+          (error (c)
+            (format t "ERROR: ~A~%" c)
+            (format t history)))))))
+
+(defun save-data-for-forex-symbol (dir sym)
+  (let ((filename (concatenate 'string dir sym ".db")))
+    (print filename)
+    (unless (probe-file filename)
+      (save-historical-data-for-forex-symbol dir sym)
+      (sleep 13))
+    (sleep 13) ;; Rate limit to 5 requests per minute
+    (let ((exchange (fetch-exchange sym)))
+      (handler-case
+          (let ((json (cdar (json:decode-json-from-string exchange))))
+            (with-open-file (stream filename :direction :output :if-exists :append)
+              (format stream "P ~A ~A ~A USD~%"
+                      (cdr (assoc :|6. *LAST *REFRESHED| json))
+                      sym
+                      (cdr (assoc :|5. *EXCHANGE *RATE| json)))))
+        (error (c)
+          (format t "ERROR: ~A~%" c)
+          (format t exchange))))))
+
 (defun pull-daily ()
   (let ((repo-dir (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))))
     (pull-repo repo-dir *repo-git-uri*)
+    (let ((fiat-dir (format nil "~A/daily-price-depot/fiat/" (uiop:getenv "HOME"))))
+      (loop for currency across *fiats* do
+        (save-data-for-forex-symbol fiat-dir currency)))
     (let ((equity-dir (format nil "~A/daily-price-depot/equity/" (uiop:getenv "HOME"))))
       (loop for equity across *equities* do
         (save-data-for-symbol equity-dir equity)))
