@@ -23,7 +23,7 @@
   :serial t
   :components ((:file "package")
                (:file "fetch")
-               (:file "pull-repo")
+               (:file "git")
 	       (:file "daily-price-depot-droid"))
   :depends-on (:alexandria
                :cl-csv
