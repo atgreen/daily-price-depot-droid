@@ -53,6 +53,7 @@
                ".db"))
 
 (defun save-historical-data-for-equity (dir sym)
+  (log:info "save-historical-data-for-equity")
   (let ((filename (compute-equity-filename dir sym))
         (cutoff (- (get-universal-time)
                    (- (date-time-parser:parse-date-time "2007")
@@ -76,27 +77,27 @@
             (format t history)))))))
 
 (defun save-data-for-equity (dir sym)
+  (log:info sym)
   (let ((filename (compute-equity-filename dir sym)))
-    (print filename)
+    (log:info filename)
     (sleep 13) ;; Rate limit to 5 requests per minute per API key
     (unless (probe-file filename)
       (save-historical-data-for-equity dir sym)
       (sleep 13))
-    (when (probe-file filename)
-      (let ((price (fetch-price sym)))
-        (print price)
-        (handler-case
-            (let ((json (cdar (json:decode-json-from-string price))))
-              (print json)
-              (with-open-file (stream filename :direction :output :if-exists :append)
-                (format stream "P ~A 16:00:00 ~A ~A ~A~%"
-                        (cdr (assoc :|07. LATEST TRADING DAY| json))
-                        sym
-                        (cdr (assoc :|08. PREVIOUS CLOSE| json))
-                        (equity-currency sym))))
-          (error (c)
-            (format t "ERROR: ~A~%" c)
-            (format t price)))))))
+    (let ((price (fetch-price sym)))
+      (log:info price)
+      (handler-case
+          (let ((json (cdar (json:decode-json-from-string price))))
+            (print json)
+            (with-open-file (stream filename :direction :output :if-exists :append)
+              (format stream "P ~A 16:00:00 ~A ~A ~A~%"
+                      (cdr (assoc :|07. LATEST TRADING DAY| json))
+                      sym
+                      (cdr (assoc :|08. PREVIOUS CLOSE| json))
+                      (equity-currency sym))))
+        (error (c)
+          (format t "ERROR: ~A~%" c)
+          (format t price))))))
 
 (defun pull-daily ()
   (let ((equity-dir (format nil "~A/daily-price-depot/equity/" (uiop:getenv "HOME"))))
