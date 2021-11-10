@@ -41,7 +41,7 @@
                       ("outputsize" . "full")
                       ("datatype" . "csv")
                       ("apikey" . ,*alphavantage-api-key*))))
-    (octets-to-string
+    (flexi-streams:octets-to-string
      (drakma:http-request +alphavantage-api-uri+
                           :method :get
                           :parameters parameters))))
