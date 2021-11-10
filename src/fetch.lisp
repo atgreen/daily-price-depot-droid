@@ -112,6 +112,7 @@
 
 (defun fetch-forex-history (currency)
   (format t "Fetching historical ~A rates.~%" currency)
+  (sleep 13) ;; Rate limit to 5 calls / minute
   (let ((parameters `(("function" . "FX_DAILY")
                       ("from_symbol" . ,currency)
                       ("to_symbol" . "USD")
@@ -125,6 +126,7 @@
 
 (defun fetch-exchange (currency)
   (format t "Fetching exchange rate for ~A." currency)
+  (sleep 13) ;; Rate limit to 5 calls / minute
   (let ((parameters `(("function" . "CURRENCY_EXCHANGE_RATE")
                       ("from_currency" . ,currency)
                       ("to_currency" . "USD")
