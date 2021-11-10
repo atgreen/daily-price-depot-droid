@@ -19,17 +19,13 @@
 (in-package :daily-price-depot-droid)
 
 (defparameter +alphavantage-api-uri+ "https://www.alphavantage.co/query")
-(defparameter *alphavantage-api-key* (uiop:getenv "ALPHAVANTAGE_API_KEY"))
 
-(defun equity-currency (equity)
+(defun symbol-currency (equity)
   (let ((epair (split-sequence:split-sequence #\. equity)))
     (if (or (string= (car (cdr epair)) "TSX")
             (string= (car (cdr epair)) "CADFUNDS"))
         "CAD"
         "USD")))
-
-(defun fund-currency (equity)
-  "USD")
 
 (defun transform-equity-symbol (equity)
   (let ((epair (split-sequence:split-sequence #\. equity)))
@@ -90,12 +86,12 @@
                               (car price)
                               sym
                               (nth 4 price)
-                              (equity-currency sym)))))))
+                              (symbol-currency sym)))))))
           (error (c)
             (format t "ERROR: ~A~%" c)
             (format t history)))))))
 
-(defun save-data-for-equity (dir sym)
+(defun save-data-for-symbol (dir sym)
   (log:info sym)
   (let ((filename (compute-equity-filename dir sym)))
     (log:info filename)
@@ -113,23 +109,18 @@
                       (cdr (assoc :|07. LATEST TRADING DAY| json))
                       sym
                       (cdr (assoc :|08. PREVIOUS CLOSE| json))
-                      (equity-currency sym))))
+                      (symbol-currency sym))))
         (error (c)
           (format t "ERROR: ~A~%" c)
           (format t price))))))
 
 (defun pull-daily ()
-  (let ((equity-dir (format nil "~A/daily-price-depot/equity/" (uiop:getenv "HOME"))))
-    (pull-repo (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))
-               *repo-git-uri*)
-    (loop for equity across *equities* do
-      (save-data-for-equity equity-dir equity))
-    (commit-and-push-repo equity-dir)))
-
-(defun pull-daily-funds ()
-  (let ((equity-dir (format nil "~A/daily-price-depot/fund/" (uiop:getenv "HOME"))))
-    (pull-repo (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))
-               *repo-git-uri*)
-    (loop for equity across *funds* do
-      (save-data-for-equity equity-dir equity))
-    (commit-and-push-repo equity-dir)))
+  (let ((repo-dir (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))))
+    (pull-repo repo-dir *repo-git-uri*)
+    (let ((equity-dir (format nil "~A/daily-price-depot/equity/" (uiop:getenv "HOME"))))
+      (loop for equity across *equities* do
+        (save-data-for-symbol equity-dir equity)))
+    (let ((fund-dir (format nil "~A/daily-price-depot/fund/" (uiop:getenv "HOME"))))
+      (loop for fund across *funds* do
+        (save-data-for-symbol fund-dir fund)))
+    (commit-and-push-repo repo-dir)))
