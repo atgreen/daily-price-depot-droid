@@ -140,7 +140,7 @@
   (let ((filename (concatenate 'string dir sym ".db")))
     (unless (probe-file filename)
       (sleep 13) ;; Rate limit to 5 requests per minute
-      (let ((history (fetch-history sym)))
+      (let ((history (fetch-forex-history sym)))
         (handler-case
             (let ((prices (reverse (cdr (cl-csv:read-csv history)))))
               (with-open-file (stream filename :direction :output :if-exists :overwrite :if-does-not-exist :create)
