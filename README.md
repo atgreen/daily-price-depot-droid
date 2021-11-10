@@ -2,10 +2,10 @@
 
 # daily-price-depot-droid
 
-This software, which I run as a pod on k8s, fetches historical and
-daily price data from [Alpha Vantage](https://alphavantage.co) and
-stores them in [ledger](https://ledger-cli.org) compatible files in a
-git repo (your daily price depot).
+This software, which runs neatly as a pod on k8s, fetches historical
+and daily price data from [Alpha Vantage](https://alphavantage.co) and
+stores them in [ledger](https://ledger-cli.org)-compatible files in a
+git repo (your "daily price depot"), ready to consume by `ledger`.
 
 Sample /etc/daily-price-depot-droid/config.ini:
 
