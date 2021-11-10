@@ -179,6 +179,9 @@
     (let ((fiat-dir (format nil "~A/daily-price-depot/fiat/" (uiop:getenv "HOME"))))
       (loop for currency across *fiats* do
         (save-data-for-forex-symbol fiat-dir currency)))
+    (let ((commodity-dir (format nil "~A/daily-price-depot/commodity/" (uiop:getenv "HOME"))))
+      (loop for commodity across *commodities* do
+        (save-data-for-forex-symbol commodity-dir commodity)))
     (let ((equity-dir (format nil "~A/daily-price-depot/equity/" (uiop:getenv "HOME"))))
       (loop for equity across *equities* do
         (save-data-for-symbol equity-dir equity)))

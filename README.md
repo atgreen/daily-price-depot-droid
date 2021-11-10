@@ -7,4 +7,6 @@ Sample /etc/daily-price-depot-droid/config.ini:
     ALPHAVANTAGE_API_KEY = "SFDGSO98W34K34LW"
     repo-git-uri = "https://username:password@git.example.com/username/daily-price-depot"
     equities = [ "IBM.NYSE", "KD.NYSE" ]
+    fiats = [ "CAD", "EUR" ]
+    commodities = [ "XAU", "XAG" ]
     cron-schedule = "10 16 * * *"

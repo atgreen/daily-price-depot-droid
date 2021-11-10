@@ -48,6 +48,7 @@
 (defvar *equities* nil)
 (defvar *funds* nil)
 (defvar *fiats* nil)
+(defvar *commodities* nil)
 (defvar *repo-git-uri* nil)
 
 ;; ----------------------------------------------------------------------------
@@ -209,6 +210,7 @@
       (setf *equities* (get-config-value "equities"))
       (setf *funds* (get-config-value "funds"))
       (setf *fiats* (get-config-value "fiats"))
+      (setf *commodities* (get-config-value "commodities"))
       (setf *repo-git-uri* (get-config-value "repo-git-uri"))
 
       (pull-repo (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))
