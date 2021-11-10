@@ -154,18 +154,18 @@
             (format t "ERROR: ~A~%" c)
             (format t history)))))))
 
-(defun save-data-for-forex-symbol (dir sym)
+(defun save-data-for-forex-symbol (dir sym &key (fetch-history t))
   (let ((filename (concatenate 'string dir sym ".db")))
     (print filename)
     (ensure-directories-exist filename)
-    (unless (probe-file filename)
-      (save-historical-data-for-forex-symbol dir sym)
-      (sleep 13))
-    (sleep 13) ;; Rate limit to 5 requests per minute
+    (when fetch-history
+      (unless (probe-file filename)
+        (save-historical-data-for-forex-symbol dir sym)
+        (sleep 13)))
     (let ((exchange (fetch-exchange sym)))
       (handler-case
           (let ((json (cdar (json:decode-json-from-string exchange))))
-            (with-open-file (stream filename :direction :output :if-exists :append)
+            (with-open-file (stream filename :direction :output :if-exists :append :if-does-not-exist :create)
               (format stream "P ~A ~A ~A USD~%"
                       (cdr (assoc :|6. *LAST *REFRESHED| json))
                       sym
@@ -182,7 +182,7 @@
         (save-data-for-forex-symbol fiat-dir currency)))
     (let ((commodity-dir (format nil "~A/daily-price-depot/commodity/" (uiop:getenv "HOME"))))
       (loop for commodity across *commodities* do
-        (save-data-for-forex-symbol commodity-dir commodity)))
+        (save-data-for-forex-symbol commodity-dir commodity :fetch-history nil)))
     (let ((equity-dir (format nil "~A/daily-price-depot/equity/" (uiop:getenv "HOME"))))
       (loop for equity across *equities* do
         (save-data-for-symbol equity-dir equity)))
