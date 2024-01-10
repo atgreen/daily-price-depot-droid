@@ -6,10 +6,7 @@ all:
 	@echo " run		- run locally"
 
 run:
-	sbcl --eval '(pushnew (truename "./src") ql:*local-project-directories* )' \
-	     --eval '(ql:register-local-projects)' \
-	     --eval '(ql:quickload :daily-price-depot-droid)' \
-	     --eval '(daily-price-depot-droid:start-server)'
+	sbcl --eval '(setf ocicl-runtime:*download* t)' --eval '(asdf:load-system :daily-price-depot-droid)' --eval '(daily-price-depot-droid:start-server)'
 
 podman-start:
 	sh test/podman-start.sh

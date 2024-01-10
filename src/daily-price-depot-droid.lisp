@@ -1,6 +1,6 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: DAILY-PRICE-DEPOT-DROID; Base: 10 -*-
 ;;;
-;;; Copyright (C) 2021  Anthony Green <anthony@atgreen.org>
+;;; Copyright (C) 2021, 2023, 2024  Anthony Green <anthony@atgreen.org>
 ;;;
 ;;; This program is free software: you can redistribute it and/or
 ;;; modify it under the terms of the GNU Affero General Public License
@@ -45,6 +45,7 @@
 
 (defvar *scheduler* (make-instance 'scheduler:in-memory-scheduler))
 (defvar *alphavantage-api-key* nil)
+(defvar *goldapi-api-key* nil)
 (defvar *equities* nil)
 (defvar *funds* nil)
 (defvar *fiats* nil)
@@ -207,6 +208,7 @@
       (setf *server-uri* (get-config-value "server-uri"))
 
       (setf *alphavantage-api-key* (get-config-value "ALPHAVANTAGE_API_KEY"))
+      (setf *goldapi-api-key* (get-config-value "GOLDAPI_API_KEY"))
       (setf *equities* (get-config-value "equities"))
       (setf *funds* (get-config-value "funds"))
       (setf *fiats* (get-config-value "fiats"))
@@ -220,6 +222,8 @@
       (initialize-metrics)
 
       (log:info "Starting server")
+
+      (daily-price-depot-droid:pull-daily)
 
       (scheduler:create-scheduler-task
        *scheduler*

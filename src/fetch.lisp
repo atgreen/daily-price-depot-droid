@@ -1,6 +1,6 @@
 ;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: DAILY-PRICE-DEPOT-DROID; Base: 10 -*-
 ;;;
-;;; Copyright (C) 2021  Anthony Green <anthony@atgreen.org>
+;;; Copyright (C) 2021, 2024  Anthony Green <anthony@atgreen.org>
 ;;;
 ;;; This program is free software: you can redistribute it and/or
 ;;; modify it under the terms of the GNU Affero General Public License
@@ -19,6 +19,7 @@
 (in-package :daily-price-depot-droid)
 
 (defparameter +alphavantage-api-uri+ "https://www.alphavantage.co/query")
+(defparameter +goldapi-api-uri+ "https://www.goldapi.io/api")
 
 (defun symbol-currency (equity)
   (let ((epair (split-sequence:split-sequence #\. equity)))
@@ -124,6 +125,14 @@
                           :method :get
                           :parameters parameters))))
 
+(defun fetch-gold-silver (symbol)
+  (format t "Fetching exchange rate for ~A." currency)
+  (sleep 13) ;; Rate limit to 5 calls / minute
+  (flexi-streams:octets-to-string
+   (drakma:http-request (concatenate 'string +goldapi-api-uri+ "/~A/USD" symbol)
+                        :method :get
+                        :additional-headers `(("x-access-token" . ,*goldapi-api-key*)))))
+
 (defun fetch-exchange (currency)
   (format t "Fetching exchange rate for ~A." currency)
   (sleep 13) ;; Rate limit to 5 calls / minute
@@ -173,6 +182,19 @@
           (format t "ERROR: ~A~%" c)
           (format t exchange))))))
 
+(defun unix-timestamp-to-date-string (timestamp)
+  "Convert a UNIX timestamp to a date-time string."
+  (let* ((unix-epoch-to-universal-time-offset 2208988800)
+         (universal-time (+ timestamp unix-epoch-to-universal-time-offset))
+         (decoded-time (multiple-value-list (decode-universal-time universal-time))))
+    (format nil "~4,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
+            (nth 5 decoded-time)  ; year
+            (nth 4 decoded-time)  ; month
+            (nth 3 decoded-time)  ; day
+            (nth 2 decoded-time)  ; hour
+            (nth 1 decoded-time)  ; minute
+            (nth 0 decoded-time)))) ; second
+
 (defun pull-daily ()
   (let ((repo-dir (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))))
     (pull-repo repo-dir *repo-git-uri*)
@@ -181,7 +203,17 @@
         (save-data-for-forex-symbol fiat-dir currency)))
     (let ((commodity-dir (format nil "~A/daily-price-depot/commodity/" (uiop:getenv "HOME"))))
       (loop for commodity across *commodities* do
-        (save-data-for-forex-symbol commodity-dir commodity :fetch-history nil)))
+        (if (find commodity '("XAU" "XAG") :test #'string=)
+            (handler-case
+                (let ((json (fetch-gold-silver symbol)))
+                  (with-open-file (stream (format nil "~A/daily-price-depot/commodity/~A.db" (uiop:getenv "HOME") symbol) :direction :output :if-exists :append :if-does-not-exist :create)
+                    (format stream "P ~A ~A ~A USD~%"
+                      (unix-timestamp-to-date-string (cdr (assoc :|TIMESTAMP| json)))
+                      sym
+                      (cdr (assoc :|PRICE| json)))))
+              (error (c)
+                (format t "ERROR: ~A~%" c)
+                (format t exchange))))))
     (let ((equity-dir (format nil "~A/daily-price-depot/equity/" (uiop:getenv "HOME"))))
       (loop for equity across *equities* do
         (save-data-for-symbol equity-dir equity)))
