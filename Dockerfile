@@ -10,7 +10,7 @@ ENV LC_ALL=C.utf8 \
     PATH=/opt/daily-price-depot-droid/.local/bin:$PATH \
     HOME=/opt/daily-price-depot-droid
 
-RUN dnf -y install bzip2 git
+RUN dnf -y install bzip2 git make
 
 RUN curl -L -O "https://downloads.sourceforge.net/project/sbcl/sbcl/${SBCL_VERSION}/sbcl-${SBCL_VERSION}-x86-64-linux-binary.tar.bz2" \
     && tar -xf sbcl-${SBCL_VERSION}-x86-64-linux-binary.tar.bz2 \
