@@ -205,7 +205,8 @@
       (loop for commodity across *commodities* do
         (if (find commodity '("XAU" "XAG") :test #'string=)
             (handler-case
-                (let ((json (fetch-gold-silver commodity)))
+                (let ((json (json:decode-json-from-string (fetch-gold-silver commodity))))
+                  (print json)
                   (with-open-file (stream (format nil "~A/daily-price-depot/commodity/~A.db" (uiop:getenv "HOME") commodity) :direction :output :if-exists :append :if-does-not-exist :create)
                     (format stream "P ~A ~A ~A USD~%"
                       (unix-timestamp-to-date-string (cdr (assoc :|TIMESTAMP| json)))
