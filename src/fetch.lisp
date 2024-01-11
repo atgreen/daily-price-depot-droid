@@ -126,7 +126,7 @@
                           :parameters parameters))))
 
 (defun fetch-gold-silver (symbol)
-  (format t "Fetching exchange rate for ~A." currency)
+  (format t "Fetching exchange rate for ~A." symbol)
   (sleep 13) ;; Rate limit to 5 calls / minute
   (flexi-streams:octets-to-string
    (drakma:http-request (concatenate 'string +goldapi-api-uri+ "/~A/USD" symbol)
@@ -213,7 +213,7 @@
                       (cdr (assoc :|PRICE| json)))))
               (error (c)
                 (format t "ERROR: ~A~%" c)
-                (format t exchange))))))
+                (format t json))))))
     (let ((equity-dir (format nil "~A/daily-price-depot/equity/" (uiop:getenv "HOME"))))
       (loop for equity across *equities* do
         (save-data-for-symbol equity-dir equity)))
