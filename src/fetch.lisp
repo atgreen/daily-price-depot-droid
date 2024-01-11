@@ -210,11 +210,10 @@
                   (with-open-file (stream (format nil "~A/daily-price-depot/commodity/~A.db" (uiop:getenv "HOME") commodity) :direction :output :if-exists :append :if-does-not-exist :create)
                     (format stream "P ~A ~A ~A USD~%"
                       (unix-timestamp-to-date-string (cdr (assoc :|TIMESTAMP| json)))
-                      sym
+                      commodity
                       (cdr (assoc :|PRICE| json)))))
               (error (c)
-                (format t "ERROR: ~A~%" c)
-                (format t json))))))
+                (format t "ERROR: ~A~%" c))))))
     (let ((equity-dir (format nil "~A/daily-price-depot/equity/" (uiop:getenv "HOME"))))
       (loop for equity across *equities* do
         (save-data-for-symbol equity-dir equity)))
