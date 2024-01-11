@@ -129,7 +129,7 @@
   (format t "Fetching exchange rate for ~A." symbol)
   (sleep 13) ;; Rate limit to 5 calls / minute
   (flexi-streams:octets-to-string
-   (drakma:http-request (concatenate 'string +goldapi-api-uri+ "/~A/USD" symbol)
+   (drakma:http-request (format nil "~A/~A/USD" +goldapi-api-uri+ symbol)
                         :method :get
                         :additional-headers `(("x-access-token" . ,*goldapi-api-key*)))))
 
