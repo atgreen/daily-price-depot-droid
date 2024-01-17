@@ -199,7 +199,7 @@
 
   (log:info config-ini)
   (log:info (fad:file-exists-p config-ini))
-  (log:info (read-file-into-string config-ini :external-format :latin-1))
+  (log:info (alexandria:read-file-into-string config-ini :external-format :latin-1))
 
   (setf *config*
   	    (if (fad:file-exists-p config-ini)
