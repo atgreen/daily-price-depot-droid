@@ -43,4 +43,4 @@ RUN chmod -R go+rwx /opt/daily-price-depot-droid
 
 RUN ./orb sbcl --userinit /opt/daily-price-depot-droid/.sbclrc --eval '(asdf:load-system :daily-price-depot-droid)' --eval '(quit)'
 
-CMD ./orb sbcl --userinit /opt/daily-price-depot-droid/.sbclrc --eval '(asdf:load-system :daily-price-depot-droid)' --eval '(daily-price-depot-droid:start-server)'
+CMD ./orb sbcl --userinit /opt/daily-price-depot-droid/.sbclrc --eval '(asdf:load-system :daily-price-depot-droid)' --eval '(daily-price-depot-droid:pull-daily)'
