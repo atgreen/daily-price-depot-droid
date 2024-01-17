@@ -201,82 +201,81 @@
   (log:info (fad:file-exists-p config-ini))
   (log:info (alexandria:read-file-into-string config-ini :external-format :latin-1))
 
-  (setf *config*
-  	    (if (fad:file-exists-p config-ini)
-	          (cl-toml:parse
-	           (alexandria:read-file-into-string config-ini
-					                                     :external-format :latin-1))
-	        (make-hash-table)))
+  (let ((config (if (fad:file-exists-p config-ini)
+	                  (cl-toml:parse
+	                   (alexandria:read-file-into-string config-ini
+					                                             :external-format :latin-1))
+	                (make-hash-table))))
 
-  (flet ((get-config-value (key)
-	                         (let ((value (or (gethash key *config*)
-			                                      (gethash key *default-config*)
-			                                      (error "config does not contain key '~A'" key))))
-	                           ;; Some of the users of these values are very strict
-	                           ;; when it comes to string types... I'm looking at you,
-	                           ;; SB-BSD-SOCKETS:GET-HOST-BY-NAME.
-                             (handler-case
-		                             (coerce value 'simple-string)
-                               (error () value)))))
+    (flet ((get-config-value (key)
+	                           (let ((value (or (gethash key config)
+			                                        (gethash key *default-config*)
+			                                        (error "config does not contain key '~A'" key))))
+	                             ;; Some of the users of these values are very strict
+	                             ;; when it comes to string types... I'm looking at you,
+	                             ;; SB-BSD-SOCKETS:GET-HOST-BY-NAME.
+                               (handler-case
+		                               (coerce value 'simple-string)
+                                 (error () value)))))
 
-    ;; Extract any config.ini settings here.
-    (setf *server-uri* (get-config-value "server-uri"))
+      ;; Extract any config.ini settings here.
+      (setf *server-uri* (get-config-value "server-uri"))
 
-    (setf *alphavantage-api-key* (get-config-value "ALPHAVANTAGE_API_KEY"))
-    (setf *goldapi-api-key* (get-config-value "GOLDAPI_API_KEY"))
-    (setf *equities* (get-config-value "equities"))
-    (setf *funds* (get-config-value "funds"))
-    (setf *fiats* (get-config-value "fiats"))
-    (setf *commodities* (get-config-value "commodities"))
-    (setf *repo-git-uri* (get-config-value "repo-git-uri"))
+      (setf *alphavantage-api-key* (get-config-value "ALPHAVANTAGE_API_KEY"))
+      (setf *goldapi-api-key* (get-config-value "GOLDAPI_API_KEY"))
+      (setf *equities* (get-config-value "equities"))
+      (setf *funds* (get-config-value "funds"))
+      (setf *fiats* (get-config-value "fiats"))
+      (setf *commodities* (get-config-value "commodities"))
+      (setf *repo-git-uri* (get-config-value "repo-git-uri"))
 
-    (let ((repo-dir (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))))
-      (pull-repo repo-dir *repo-git-uri*)
-      (let ((fiat-dir (format nil "~A/daily-price-depot/fiat/" (uiop:getenv "HOME"))))
-        (loop for currency across *fiats* do
-              (save-data-for-forex-symbol fiat-dir currency)))
-      (let ((commodity-dir (format nil "~A/daily-price-depot/commodity/" (uiop:getenv "HOME"))))
-        (loop for commodity across *commodities* do
-              (if (find commodity '("XAU" "XAG") :test #'string=)
-                  (handler-case
-                      (let ((json (json:decode-json-from-string (fetch-gold-silver commodity))))
-                        (print json)
-                        (with-open-file (stream (format nil "~A/daily-price-depot/commodity/~A.db" (uiop:getenv "HOME") commodity) :direction :output :if-exists :append :if-does-not-exist :create)
-                                        (format stream "P ~A ~A ~A USD~%"
-                                                (unix-timestamp-to-date-string (cdr (assoc :|TIMESTAMP| json)))
-                                                commodity
-                                                (cdr (assoc :|PRICE| json)))))
-                    (error (c)
-                           (format t "ERROR: ~A~%" c))))))
-      (let ((equity-dir (format nil "~A/daily-price-depot/equity/" (uiop:getenv "HOME"))))
-        (loop for equity across *equities* do
-              (save-data-for-symbol equity-dir equity)))
-      (let ((fund-dir (format nil "~A/daily-price-depot/fund/" (uiop:getenv "HOME"))))
-        (loop for fund across *funds* do
-              (save-data-for-symbol fund-dir fund)))
+      (let ((repo-dir (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))))
+        (pull-repo repo-dir *repo-git-uri*)
+        (let ((fiat-dir (format nil "~A/daily-price-depot/fiat/" (uiop:getenv "HOME"))))
+          (loop for currency across *fiats* do
+                (save-data-for-forex-symbol fiat-dir currency)))
+        (let ((commodity-dir (format nil "~A/daily-price-depot/commodity/" (uiop:getenv "HOME"))))
+          (loop for commodity across *commodities* do
+                (if (find commodity '("XAU" "XAG") :test #'string=)
+                    (handler-case
+                        (let ((json (json:decode-json-from-string (fetch-gold-silver commodity))))
+                          (print json)
+                          (with-open-file (stream (format nil "~A/daily-price-depot/commodity/~A.db" (uiop:getenv "HOME") commodity) :direction :output :if-exists :append :if-does-not-exist :create)
+                                          (format stream "P ~A ~A ~A USD~%"
+                                                  (unix-timestamp-to-date-string (cdr (assoc :|TIMESTAMP| json)))
+                                                  commodity
+                                                  (cdr (assoc :|PRICE| json)))))
+                      (error (c)
+                             (format t "ERROR: ~A~%" c))))))
+        (let ((equity-dir (format nil "~A/daily-price-depot/equity/" (uiop:getenv "HOME"))))
+          (loop for equity across *equities* do
+                (save-data-for-symbol equity-dir equity)))
+        (let ((fund-dir (format nil "~A/daily-price-depot/fund/" (uiop:getenv "HOME"))))
+          (loop for fund across *funds* do
+                (save-data-for-symbol fund-dir fund)))
 
-      ;; Trim to 7 years max
-      (let ((cutoff (- (get-universal-time)
-                       (- (date-time-parser:parse-date-time "2007")
-                          (date-time-parser:parse-date-time "2000")))))
-        (uiop:collect-sub*directories
-         (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))
-         (constantly t)
-         (constantly t)
-         (lambda (it)
-           (dolist (filename (uiop:directory-files it "*.db"))
-             (print filename)
-             (let ((trimmed-file (concatenate 'string (namestring filename) ".trim")))
-               (with-open-file (out-stream
-                                trimmed-file :direction :output
-                                :if-exists :overwrite
-                                :if-does-not-exist :create)
-                               (with-open-file (in-stream filename)
-                                               (loop for line = (read-line in-stream nil)
-                                                     while line do
-                                                     (let ((date (date-time-parser:parse-date-time (subseq line 2 12))))
-                                                       (when (> date cutoff)
-                                                         (format out-stream "~A~%" line))))))
-               (rename-file trimmed-file filename))))))
+        ;; Trim to 7 years max
+        (let ((cutoff (- (get-universal-time)
+                         (- (date-time-parser:parse-date-time "2007")
+                            (date-time-parser:parse-date-time "2000")))))
+          (uiop:collect-sub*directories
+           (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))
+           (constantly t)
+           (constantly t)
+           (lambda (it)
+             (dolist (filename (uiop:directory-files it "*.db"))
+               (print filename)
+               (let ((trimmed-file (concatenate 'string (namestring filename) ".trim")))
+                 (with-open-file (out-stream
+                                  trimmed-file :direction :output
+                                  :if-exists :overwrite
+                                  :if-does-not-exist :create)
+                                 (with-open-file (in-stream filename)
+                                                 (loop for line = (read-line in-stream nil)
+                                                       while line do
+                                                       (let ((date (date-time-parser:parse-date-time (subseq line 2 12))))
+                                                         (when (> date cutoff)
+                                                           (format out-stream "~A~%" line))))))
+                 (rename-file trimmed-file filename))))))
 
-      (commit-and-push-repo repo-dir))))
+        (commit-and-push-repo repo-dir)))))
