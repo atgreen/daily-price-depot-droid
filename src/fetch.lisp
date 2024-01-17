@@ -197,6 +197,10 @@
 
 (defun pull-daily (&optional (config-ini "/etc/daily-price-depot-droid/config.ini"))
 
+  (log config-ini)
+  (log (fad:file-exists-p config-ini))
+  (log (read-file-into-string config-ini :external-format :latin-1))
+
   (setf *config*
   	    (if (fad:file-exists-p config-ini)
 	          (cl-toml:parse
