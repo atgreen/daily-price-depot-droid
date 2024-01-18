@@ -199,7 +199,7 @@
 
   (log:info config-ini)
   (log:info (fad:file-exists-p config-ini))
-  (log:info (alexandria:read-file-into-string config-ini :external-format :latin-1))
+  (log:info (cl-toml:parse (alexandria:read-file-into-string config-ini :external-format :latin-1)))
 
   (let ((config (if (fad:file-exists-p config-ini)
 	                  (cl-toml:parse
@@ -208,8 +208,8 @@
 	                (make-hash-table))))
 
     (flet ((get-config-value (key)
+                             (log:info config)
 	                           (let ((value (or (gethash key config)
-			                                        (gethash key *default-config*)
 			                                        (error "config does not contain key '~A'" key))))
 	                             ;; Some of the users of these values are very strict
 	                             ;; when it comes to string types... I'm looking at you,
