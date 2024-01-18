@@ -1,6 +1,6 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: DAILY-PRICE-DEPOT-DROID; Base: 10 -*-
 ;;;
-;;; Copyright (C) 2021, 2023  Anthony Green <anthony@atgreen.org>
+;;; Copyright (C) 2021, 2023, 2024  Anthony Green <anthony@atgreen.org>
 ;;;
 ;;; This program is free software: you can redistribute it and/or
 ;;; modify it under the terms of the GNU Affero General Public License
@@ -23,8 +23,7 @@
   :serial t
   :components ((:file "src/package")
                (:file "src/fetch")
-               (:file "src/git")
-               (:file "src/daily-price-depot-droid"))
+               (:file "src/git"))
   :depends-on (:alexandria
                :cl-csv
                :cl-date-time-parser
@@ -32,17 +31,8 @@
                :cl-json
                :cl-toml
                :drakma
-               :easy-routes
                :flexi-streams
-               :hunchentoot
                :inferior-shell
                :log4cl
-               :markup
-               :prometheus
-               :prometheus.collectors.process
-               :prometheus.collectors.sbcl
-               :prometheus.exposers.hunchentoot
-               :prometheus.formats.text
-               :scheduler
                :split-sequence
                :str))

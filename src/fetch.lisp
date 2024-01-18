@@ -21,6 +21,14 @@
 (defparameter +alphavantage-api-uri+ "https://www.alphavantage.co/query")
 (defparameter +goldapi-api-uri+ "https://www.goldapi.io/api")
 
+(defvar *alphavantage-api-key* nil)
+(defvar *goldapi-api-key* nil)
+(defvar *equities* nil)
+(defvar *funds* nil)
+(defvar *fiats* nil)
+(defvar *commodities* nil)
+(defvar *repo-git-uri* nil)
+
 (defun symbol-currency (equity)
   (let ((epair (split-sequence:split-sequence #\. equity)))
     (if (or (string= (car (cdr epair)) "TSX")
@@ -275,4 +283,5 @@
                                                            (format out-stream "~A~%" line))))))
                  (rename-file trimmed-file filename))))))
 
-        (commit-and-push-repo repo-dir)))))
+        (commit-and-push-repo repo-dir)
+        (quit)))))

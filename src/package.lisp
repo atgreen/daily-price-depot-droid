@@ -1,6 +1,6 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: DAILY-PRICE-DEPOT-DROID; Base: 10 -*-
 ;;;
-;;; Copyright (C) 2021  Anthony Green <anthony@atgreen.org>
+;;; Copyright (C) 2021, 2024  Anthony Green <anthony@atgreen.org>
 ;;;
 ;;; This program is free software: you can redistribute it and/or
 ;;; modify it under the terms of the GNU Affero General Public License
@@ -21,4 +21,4 @@
 (defpackage #:daily-price-depot-droid
   (:use #:cl)
   (:shadow #:package)
-  (:export #:start-server #:stop-server #:pull-daily))
+  (:export #:pull-daily))
