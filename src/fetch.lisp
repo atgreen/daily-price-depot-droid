@@ -284,4 +284,5 @@
                  (rename-file trimmed-file filename))))))
 
         (commit-and-push-repo repo-dir)
-        (quit)))))
+        (sb-ext:quit)))))
+?
