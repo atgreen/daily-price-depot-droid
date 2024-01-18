@@ -218,9 +218,6 @@
 		                               (coerce value 'simple-string)
                                  (error () value)))))
 
-      ;; Extract any config.ini settings here.
-      (setf *server-uri* (get-config-value "server-uri"))
-
       (setf *alphavantage-api-key* (get-config-value "ALPHAVANTAGE_API_KEY"))
       (setf *goldapi-api-key* (get-config-value "GOLDAPI_API_KEY"))
       (setf *equities* (get-config-value "equities"))
