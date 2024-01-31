@@ -31,16 +31,14 @@ RUN git clone --depth=1 https://github.com/ocicl/ocicl.git; cd ocicl; make; make
     && echo "(push (uiop:getcwd) asdf:*central-registry*)" >> ~/.sbclrc \
     && echo "(setf ocicl-runtime:*verbose* t)" >> ~/.sbclrc \
     && echo "(setf ocicl-runtime:*download* t)" >> ~/.sbclrc \
-    && sbcl --non-interactive --eval "(quit)"
-
-RUN ocicl install
+    && sbcl --non-interactive --eval "(quit)" \
+    && ocicl install \
+    && sbcl --userinit /opt/daily-price-depot-droid/.sbclrc --eval '(asdf:load-system :daily-price-depot-droid)' --eval '(quit)'
 
 RUN curl -L -O "https://github.com/atgreen/green-orb/releases/download/v${GREEN_ORB_VERSION}/green-orb-${GREEN_ORB_VERSION}-linux-amd64.tar.gz" \
     && tar xf green-orb-${GREEN_ORB_VERSION}-linux-amd64.tar.gz \
     && rm green-orb-${GREEN_ORB_VERSION}-linux-amd64.tar.gz
 
 RUN chmod -R go+rwx /opt/daily-price-depot-droid
-
-RUN ./orb sbcl --userinit /opt/daily-price-depot-droid/.sbclrc --eval '(asdf:load-system :daily-price-depot-droid)' --eval '(quit)'
 
 CMD ./orb sbcl --userinit /opt/daily-price-depot-droid/.sbclrc --eval '(asdf:load-system :daily-price-depot-droid)' --eval '(daily-price-depot-droid:pull-daily)'
