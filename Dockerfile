@@ -32,6 +32,7 @@ RUN git clone --depth=1 https://github.com/ocicl/ocicl.git; cd ocicl; make; make
     && echo "(setf ocicl-runtime:*verbose* t)" >> ~/.sbclrc \
     && echo "(setf ocicl-runtime:*download* t)" >> ~/.sbclrc \
     && sbcl --non-interactive --eval "(quit)" \
+    && cd .. \
     && ocicl install \
     && sbcl --userinit /opt/daily-price-depot-droid/.sbclrc --eval '(asdf:load-system :daily-price-depot-droid)' --eval '(quit)'
 
