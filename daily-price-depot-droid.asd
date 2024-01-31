@@ -31,6 +31,8 @@
                :cl-json
                :cl-toml
                :drakma
+               :plump
+               :lquery
                :flexi-streams
                :inferior-shell
                :log4cl
