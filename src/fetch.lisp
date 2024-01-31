@@ -234,10 +234,10 @@
       (setf *commodities* (get-config-value "commodities"))
       (setf *repo-git-uri* (get-config-value "repo-git-uri"))
 
-      (handler-case
-          (sb-sys:with-deadline (:seconds 600)
-            (let ((repo-dir (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))))
-              (pull-repo repo-dir *repo-git-uri*)
+      (let ((repo-dir (format nil "~A/daily-price-depot" (uiop:getenv "HOME"))))
+        (handler-case
+            (sb-sys:with-deadline (:seconds 600)
+             (pull-repo repo-dir *repo-git-uri*)
               (let ((fiat-dir (format nil "~A/daily-price-depot/fiat/" (uiop:getenv "HOME"))))
                 (loop for currency across *fiats* do
                       (save-data-for-forex-symbol fiat-dir currency)))
@@ -283,8 +283,8 @@
                                                              (let ((date (date-time-parser:parse-date-time (subseq line 2 12))))
                                                                (when (> date cutoff)
                                                                  (format out-stream "~A~%" line))))))
-                       (rename-file trimmed-file filename))))))))
-        (sb-sys:deadline-timeout (e)
-          (log:error "Timeout fetching data from services" e)))
-      (commit-and-push-repo repo-dir)
+                       (rename-file trimmed-file filename)))))))
+          (sb-sys:deadline-timeout (e)
+            (log:error "Timeout fetching data from services" e)))
+      (commit-and-push-repo repo-dir))
       (sb-ext:quit))))
