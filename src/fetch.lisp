@@ -19,10 +19,8 @@
 (in-package :daily-price-depot-droid)
 
 (defparameter +alphavantage-api-uri+ "https://www.alphavantage.co/query")
-(defparameter +goldapi-api-uri+ "https://www.goldapi.io/api")
 
 (defvar *alphavantage-api-key* nil)
-(defvar *goldapi-api-key* nil)
 (defvar *equities* nil)
 (defvar *funds* nil)
 (defvar *fiats* nil)
@@ -133,14 +131,6 @@
                           :method :get
                           :parameters parameters))))
 
-(defun fetch-gold-silver (symbol)
-  (format t "Fetching exchange rate for ~A." symbol)
-  (sleep 13) ;; Rate limit to 5 calls / minute
-  (flexi-streams:octets-to-string
-   (drakma:http-request (format nil "~A/~A/USD" +goldapi-api-uri+ symbol)
-                        :method :get
-                        :additional-headers `(("x-access-token" . ,*goldapi-api-key*)))))
-
 (defun fetch-exchange (currency)
   (format t "Fetching exchange rate for ~A." currency)
   (sleep 13) ;; Rate limit to 5 calls / minute
@@ -227,7 +217,6 @@
                                  (error () value)))))
 
       (setf *alphavantage-api-key* (get-config-value "ALPHAVANTAGE_API_KEY"))
-      (setf *goldapi-api-key* (get-config-value "GOLDAPI_API_KEY"))
       (setf *equities* (get-config-value "equities"))
       (setf *funds* (get-config-value "funds"))
       (setf *fiats* (get-config-value "fiats"))
@@ -245,15 +234,23 @@
                 (loop for commodity across *commodities* do
                       (if (find commodity '("XAU" "XAG") :test #'string=)
                           (handler-case
-                              (let ((json (json:decode-json-from-string (fetch-gold-silver commodity))))
-                                (print json)
+                              (let ((price (cond ((string= commodity "XAU")
+                                                  (let ((h (plump:parse (drakma:http-request "https://finance.yahoo.com/quote/GC=F"))))
+                                                    (aref (lquery:$ h "tbody > tr > td:nth-child(2)"
+                                                            (combine (text) (text))
+                                                            (map-apply #'(lambda (url xt) xt))) 4)))
+                                                 ((string= commodity "XAG")
+                                                  (let ((h (plump:parse (drakma:http-request "https://finance.yahoo.com/quote/SI=F"))))
+                                                    (aref (lquery:$ h "tbody > tr > td:nth-child(2)"
+                                                            (combine (text) (text))
+                                                            (map-apply #'(lambda (url xt) xt))) 4))))))
                                 (with-open-file (stream (format nil "~A/daily-price-depot/commodity/~A.db" (uiop:getenv "HOME") commodity) :direction :output :if-exists :append :if-does-not-exist :create)
-                                                (format stream "P ~A ~A ~A USD~%"
-                                                        (unix-timestamp-to-date-string (cdr (assoc :|TIMESTAMP| json)))
-                                                        commodity
-                                                        (cdr (assoc :|PRICE| json)))))
-                            (error (c)
-                                   (format t "ERROR: ~A~%" c))))))
+                                  (format stream "P ~A ~A ~A USD~%"
+                                          (unix-timestamp-to-date-string (local-time:timestamp-to-unix (local-time:now)))
+                                          commodity
+                                          price))))
+                          (error (c)
+                                 (format t "ERROR: ~A~%" c)))))
               (let ((equity-dir (format nil "~A/daily-price-depot/equity/" (uiop:getenv "HOME"))))
                 (loop for equity across *equities* do
                       (save-data-for-symbol equity-dir equity)))
