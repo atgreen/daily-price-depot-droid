@@ -27,7 +27,7 @@ RUN chown -R daily-price-depot-droid /opt/daily-price-depot-droid
 
 USER 1000
 
-RUN git clone --depth=1 https://github.com/ocicl/ocicl.git; cd ocicl; make; make install; ocicl version; ocicl setup > ~/.sbclrc \
+RUN git clone --depth=1 https://github.com/ocicl/ocicl.git; cd ocicl; sbcl --load setup.lisp; ocicl version; ocicl setup > ~/.sbclrc \
     && echo "(push (uiop:getcwd) asdf:*central-registry*)" >> ~/.sbclrc \
     && echo "(setf ocicl-runtime:*verbose* t)" >> ~/.sbclrc \
     && echo "(setf ocicl-runtime:*download* t)" >> ~/.sbclrc \
