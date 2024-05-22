@@ -248,9 +248,9 @@
                                   (format stream "P ~A ~A ~A USD~%"
                                           (unix-timestamp-to-date-string (local-time:timestamp-to-unix (local-time:now)))
                                           commodity
-                                          price))))
-                          (error (c)
-                                 (format t "ERROR: ~A~%" c)))))
+                                          price)))
+                            (error (c)
+                                   (format t "ERROR: ~A~%" c))))))
               (let ((equity-dir (format nil "~A/daily-price-depot/equity/" (uiop:getenv "HOME"))))
                 (loop for equity across *equities* do
                       (save-data-for-symbol equity-dir equity)))
